@@ -1,0 +1,124 @@
+---
+title: "world webscraping"
+author: "Yadu"
+date: "May 8, 2016"
+output: html_document
+---
+
+Now, we download the worldbank data and subset it so that it will include GINI coefficients only for 1981 and 2013.
+
+```{r}
+library(RCurl)
+worlddata = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Popular-indicators/master/55e42714-cbf5-42ee-9995-eed3fc8d3102_Data.csv"), sep = ","), select = c(Country.Name, X1981..YR1981., X2013..YR2013.))
+colnames(worlddata)[1] = "Country Name"
+colnames(worlddata)[2] = "1981GINI"
+colnames(worlddata)[3] = "2013GINI"
+worlddata = worlddata[1:214,]
+worlddata$`Country Name` = as.character(worlddata$`Country Name`)
+worlddata$`1981GINI` = as.numeric(as.vector(worlddata$`1981GINI`))
+worlddata$`2013GINI` = as.numeric(as.vector(worlddata$`2013GINI`))
+worlddata$`1981GINI` = as.vector(worlddata$`1981GINI`/100)
+worlddata$`2013GINI` = as.vector(worlddata$`2013GINI`/100)
+```
+
+We also rename some of the countries listed because they contain commas and parentheses. After this is done, we arrange all of the countries in alphabetical order.
+
+```{r}
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Korea, Dem. People's Rep.")]  = "North Korea"
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Korea, Rep.")]  = "South Korea"
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Congo, Dem. Rep.")] = "Democratic Republic of the Congo"
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Hong Kong SAR, China")] = "Hong Kong"
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Lao PDR")] = "Laos"
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Kyrgyz Republic")] = "Kyrgyzstan"
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Cabo Verde")] = "Cape Verde"
+worlddata$`Country Name`[which(worlddata$`Country Name` == "Slovak Republic")] = "Slovakia"
+worlddata$`Country Name` = gsub(",.*$", "", worlddata$`Country Name`)
+worlddata$`Country Name` = sub(" *\\(.*", "", worlddata$`Country Name`)
+worlddata = worlddata[order(worlddata$`Country Name`), ]
+```
+
+Now we read in a new csv file which contains GINI indices for 2013 and apply changes similar to those applied to the previous dataset. We want to make the two columns of country names as identical as possible.
+
+```{r}
+global2013 = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/global2013.csv"), sep = ","), select = c(X, X.1))[18:212, ]
+colnames(global2013) = c("Country Name", "2013GINI")
+global2013$`Country Name` = as.character(global2013$`Country Name`)
+global2013$`Country Name`[which(global2013$`Country Name` == "C\x99te d'Ivoire")] = "Cote d'Ivoire"
+global2013$`Country Name`[which(global2013$`Country Name` == "Korea (Democratic People's Rep. of)")] = "North Korea"
+global2013$`Country Name`[which(global2013$`Country Name` == "Korea (Republic of)")] = "South Korea"
+global2013$`Country Name`[which(global2013$`Country Name` == "Viet Nam")] = "Vietnam"
+global2013$`Country Name`[which(global2013$`Country Name` == "The former Yugoslav Republic of Macedonia")] = "Macedonia"
+global2013$`Country Name`[which(global2013$`Country Name` == "Congo (Democratic Republic of the)")] = "Democratic Republic of the Congo"
+global2013$`Country Name`[which(global2013$`Country Name` == "Lao People's Democratic Republic")] = "Laos"
+global2013$`Country Name`[which(global2013$`Country Name` == "Saint Kitts and Nevis")] = "St. Kitts and Nevis"
+global2013$`Country Name`[which(global2013$`Country Name` == "Saint Lucia")] = "St. Lucia"
+global2013$`Country Name`[which(global2013$`Country Name` == "Saint Vincent and the Grenadines")] = "St. Vincent and the Grenadines"
+global2013$`Country Name` = gsub(",.*$", "", global2013$`Country Name`)
+global2013$`Country Name` = sub(" *\\(.*", "", global2013$`Country Name`)
+global2013$`2013GINI` = as.vector(as.numeric(as.vector(global2013$`2013GINI`))/100)
+global2013 = global2013[order(global2013$`Country Name`), ]
+```
+
+Now, for both vectors of country names, we detect the country names that are included in one column and not the other column.
+
+```{r}
+setdiff(worlddata$`Country Name`, global2013$`Country Name`)
+setdiff(global2013$`Country Name`, worlddata$`Country Name`)
+```
+
+Finally, to make both columns identical we add the differences to both datasets and alphabetize all of the country names. 
+
+```{r}
+palestine = global2013[which(global2013$`Country Name` == "Palestine"),]
+palestine$`1981GINI` = NA
+nauru = global2013[which(global2013$`Country Name` == "Nauru"),]
+nauru$`1981GINI` = NA
+countriesunincluded = worlddata[c(which(worlddata$`Country Name` == "American Samoa"), which(worlddata$`Country Name` == "Aruba"), which(worlddata$`Country Name` == "Bermuda"), which(worlddata$`Country Name` == "Cayman Islands"), which(worlddata$`Country Name` == "Channel Islands"), which(worlddata$`Country Name` == "Curacao"), which(worlddata$`Country Name` == "Faroe Islands"), which(worlddata$`Country Name` == "French Polynesia"), which(worlddata$`Country Name` == "Greenland"), which(worlddata$`Country Name` == "Guam"), which(worlddata$`Country Name` == "Isle of Man"), which(worlddata$`Country Name` == "Kosovo"), which(worlddata$`Country Name` == "Macao SAR"), which(worlddata$`Country Name` == "New Caledonia"), which(worlddata$`Country Name` == "Northern Mariana Islands"), which(worlddata$`Country Name` == "Puerto Rico"), which(worlddata$`Country Name` == "Sint Maarten"), which(worlddata$`Country Name` == "St. Martin"), which(worlddata$`Country Name` == "Turks and Caicos Islands"), which(worlddata$`Country Name` == "Virgin Islands"), which(worlddata$`Country Name` == "West Bank and Gaza")), c(1,3)]
+worlddata = rbind(worlddata, palestine, nauru)
+worlddata = worlddata[order(worlddata$`Country Name`), ]
+global2013 = rbind(global2013, countriesunincluded)
+global2013 = global2013[order(global2013$`Country Name`), ]
+```
+
+Finally, we merge both datasets and fill in 
+```{r}
+finalworlddata = merge(global2013, worlddata, by = 'Country Name')
+finalworlddata$`2013GINI.y` = ifelse(is.na(finalworlddata$`2013GINI.y`) == TRUE, finalworlddata$`2013GINI.x`, finalworlddata$`2013GINI.y`)
+finalworlddata = finalworlddata[,c(1,3,4)]
+colnames(finalworlddata) = colnames(worlddata)
+finalworlddata$`1981GINI` = as.vector(finalworlddata$`1981GINI`)
+finalworlddata$`2013GINI` = as.vector(finalworlddata$`2013GINI`)
+```
+
+Because a lot of the data was still missing for many countries, the Quandl package was used to obtain GINI indices for them. For both years (1981 and 2013) a maximum tolerance of 3 years was allowed, meaning data for 1978, 1979, 1980, 1982, 1983, and 1984 could be collected and used if data for 1981 cold not be obtained and data for 2010, 2011, and 2012 could be collected and used if data for 2013 could not be obtained.   
+
+```{r}
+library(Quandl)
+Quandl.api_key("RNsFP11Q_uzhWbjuUiQp")
+finalworlddata[which(finalworlddata$`Country Name` == "Bangladesh"), 2] = Quandl("WORLDBANK/BGD_SI_POV_GINI")[nrow(Quandl("WORLDBANK/BGD_SI_POV_GINI")),2]/100 #1984
+finalworlddata[which(finalworlddata$`Country Name` == "Colombia"), 2] = Quandl("WORLDBANK/COL_SI_POV_GINI")[nrow(Quandl("WORLDBANK/COL_SI_POV_GINI")),2]/100 #1980
+finalworlddata[which(finalworlddata$`Country Name` == "Czech Republic"), 3] = Quandl("WORLDBANK/CZE_SI_POV_GINI")[1,2]/100 #2011
+finalworlddata[which(finalworlddata$`Country Name` == "Denmark"), 3] = Quandl("WORLDBANK/DNK_SI_POV_GINI")[1,2]/100 #2010
+finalworlddata[which(finalworlddata$`Country Name` == "Switzerland"), 2] = Quandl("WORLDBANK/CHE_SI_POV_GINI")[nrow(Quandl("WORLDBANK/CHE_SI_POV_GINI")),2]/100 #1982
+finalworlddata[which(finalworlddata$`Country Name` == "Sweden"), 2] = Quandl("WORLDBANK/SWE_SI_POV_GINI")[nrow(Quandl("WORLDBANK/SWE_SI_POV_GINI")),2]/100 #1981
+finalworlddata[which(finalworlddata$`Country Name` == "Spain"), 2] = Quandl("WORLDBANK/ESP_SI_POV_GINI")[nrow(Quandl("WORLDBANK/ESP_SI_POV_GINI")),2]/100 #1980
+finalworlddata[which(finalworlddata$`Country Name` == "Panama"), 2] = Quandl("WORLDBANK/PAN_SI_POV_GINI")[nrow(Quandl("WORLDBANK/PAN_SI_POV_GINI")),2]/100 #1979
+finalworlddata[which(finalworlddata$`Country Name` == "Netherlands"), 2] = Quandl("WORLDBANK/NLD_SI_POV_GINI")[nrow(Quandl("WORLDBANK/NLD_SI_POV_GINI")),2]/100 #1983
+finalworlddata[which(finalworlddata$`Country Name` == "Mexico"), 2] = Quandl("WORLDBANK/MEX_SI_POV_GINI")[nrow(Quandl("WORLDBANK/MEX_SI_POV_GINI")),2]/100 #1984
+finalworlddata[which(finalworlddata$`Country Name` == "Malayasia"), 2] = Quandl("WORLDBANK/MYS_SI_POV_GINI")[nrow(Quandl("WORLDBANK/MYS_SI_POV_GINI")),2]/100 #1984
+finalworlddata[which(finalworlddata$`Country Name` == "Madagascar"), 2] = Quandl("WORLDBANK/MDG_SI_POV_GINI")[nrow(Quandl("WORLDBANK/MDG_SI_POV_GINI")),2]/100 #1980
+finalworlddata[which(finalworlddata$`Country Name` == "Israel"), 2] = Quandl("WORLDBANK/ISR_SI_POV_GINI")[nrow(Quandl("WORLDBANK/ISR_SI_POV_GINI")),2]/100 #1979
+finalworlddata[which(finalworlddata$`Country Name` == "Indonesia"), 2] = Quandl("WORLDBANK/IDN_SI_POV_GINI")[nrow(Quandl("WORLDBANK/IDN_SI_POV_GINI")),2]/100 #1984
+finalworlddata[which(finalworlddata$`Country Name` == "India"), 2] = Quandl("WORLDBANK/IND_SI_POV_GINI")[nrow(Quandl("WORLDBANK/IND_SI_POV_GINI"))-1,2]/100 #1983
+finalworlddata[which(finalworlddata$`Country Name` == "Germany"), 2] = Quandl("WORLDBANK/DEU_SI_POV_GINI")[nrow(Quandl("WORLDBANK/DEU_SI_POV_GINI")),2]/100
+```
+
+Now, we load the worldmap package and plot the map of the entire world and color each country according to its GINI coefficient.
+
+```{r}
+library(rworldmap)
+library(graphics)
+n = joinCountryData2Map(finalworlddata, joinCode="NAME", nameJoinColumn="Country Name")
+mapCountryData(n, nameColumnToPlot='1981GINI', mapTitle = "1981", addLegend = F)
+mapCountryData(n, nameColumnToPlot= '2013GINI', mapTitle = "2013")
+```
