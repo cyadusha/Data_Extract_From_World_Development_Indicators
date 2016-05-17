@@ -43,7 +43,6 @@ Now we read in a new csv file which contains GINI indices for 2013 and apply cha
 global2013 = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/global2013.csv"), sep = ","), select = c(X, X.1))[18:212, ]
 colnames(global2013) = c("Country Name", "2013GINI")
 global2013$`Country Name` = as.character(global2013$`Country Name`)
-global2013$`Country Name`[which(global2013$`Country Name` == "C\x99te d'Ivoire")] = "Cote d'Ivoire"
 global2013$`Country Name`[which(global2013$`Country Name` == "Korea (Democratic People's Rep. of)")] = "North Korea"
 global2013$`Country Name`[which(global2013$`Country Name` == "Korea (Republic of)")] = "South Korea"
 global2013$`Country Name`[which(global2013$`Country Name` == "Viet Nam")] = "Vietnam"
@@ -121,7 +120,7 @@ Now, we load the worldmap package and plot the map of the entire world and color
 library(rworldmap)
 library(graphics)
 n = joinCountryData2Map(finalworlddata, joinCode="NAME", nameJoinColumn="Country Name")
-mapCountryData(n, nameColumnToPlot='1981GINI', mapTitle = "1981", addLegend = F)
+mapCountryData(n, nameColumnToPlot='1981GINI', mapTitle = "1981")
 mapCountryData(n, nameColumnToPlot= '2013GINI', mapTitle = "2013")
 ```
 
