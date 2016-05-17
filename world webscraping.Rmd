@@ -80,7 +80,8 @@ global2013 = rbind(global2013, countriesunincluded)
 global2013 = global2013[order(global2013$`Country Name`), ]
 ```
 
-Finally, we merge both datasets and fill in 
+Finally, we merge both datasets and fill in the missing data.
+
 ```{r}
 finalworlddata = merge(global2013, worlddata, by = 'Country Name')
 finalworlddata$`2013GINI.y` = ifelse(is.na(finalworlddata$`2013GINI.y`) == TRUE, finalworlddata$`2013GINI.x`, finalworlddata$`2013GINI.y`)
@@ -111,6 +112,7 @@ finalworlddata[which(finalworlddata$`Country Name` == "Israel"), 2] = Quandl("WO
 finalworlddata[which(finalworlddata$`Country Name` == "Indonesia"), 2] = Quandl("WORLDBANK/IDN_SI_POV_GINI")[nrow(Quandl("WORLDBANK/IDN_SI_POV_GINI")),2]/100 #1984
 finalworlddata[which(finalworlddata$`Country Name` == "India"), 2] = Quandl("WORLDBANK/IND_SI_POV_GINI")[nrow(Quandl("WORLDBANK/IND_SI_POV_GINI"))-1,2]/100 #1983
 finalworlddata[which(finalworlddata$`Country Name` == "Germany"), 2] = Quandl("WORLDBANK/DEU_SI_POV_GINI")[nrow(Quandl("WORLDBANK/DEU_SI_POV_GINI")),2]/100
+finalworlddata[which(finalworlddata$`Country Name` == "United States"), 2] = 0.471 # obtained from Table 3 of http://www.levyinstitute.org/pubs/wp_826.pdf
 ```
 
 Now, we load the worldmap package and plot the map of the entire world and color each country according to its GINI coefficient.
@@ -122,3 +124,9 @@ n = joinCountryData2Map(finalworlddata, joinCode="NAME", nameJoinColumn="Country
 mapCountryData(n, nameColumnToPlot='1981GINI', mapTitle = "1981", addLegend = F)
 mapCountryData(n, nameColumnToPlot= '2013GINI', mapTitle = "2013")
 ```
+
+http://hdr.undp.org/en/content/income-gini-coefficient
+
+http://databank.worldbank.org/data/reports.aspx?Code=SI.POV.GINI&id=af3ce82b&report_name=Popular_indicators&populartype=series&ispopular=y
+
+http://www.levyinstitute.org/pubs/wp_826.pdf
