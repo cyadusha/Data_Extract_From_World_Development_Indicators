@@ -111,7 +111,38 @@ finalworlddata[which(finalworlddata$`Country Name` == "Israel"), 2] = Quandl("WO
 finalworlddata[which(finalworlddata$`Country Name` == "Indonesia"), 2] = Quandl("WORLDBANK/IDN_SI_POV_GINI")[nrow(Quandl("WORLDBANK/IDN_SI_POV_GINI")),2]/100 #1984
 finalworlddata[which(finalworlddata$`Country Name` == "India"), 2] = Quandl("WORLDBANK/IND_SI_POV_GINI")[nrow(Quandl("WORLDBANK/IND_SI_POV_GINI"))-1,2]/100 #1983
 finalworlddata[which(finalworlddata$`Country Name` == "Germany"), 2] = Quandl("WORLDBANK/DEU_SI_POV_GINI")[nrow(Quandl("WORLDBANK/DEU_SI_POV_GINI")),2]/100
-finalworlddata[which(finalworlddata$`Country Name` == "United States"), 2] = 0.471 # obtained from Table 3 of http://www.levyinstitute.org/pubs/wp_826.pdf
+```
+
+```{r}
+library(RCurl)
+inequalityaustralia = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/DP_LIVE_17052016053150297.csv"), sep = ","), LOCATION == "AUT", select = Value)
+inequalityfrance = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/DP_LIVE_17052016053150297.csv"), sep = ","), LOCATION == "FRA", select = Value)
+inequalityiceland = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/DP_LIVE_17052016053150297.csv"), sep = ","), LOCATION == "ISL", select = Value)
+inequalitysouthkorea = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/DP_LIVE_17052016053150297.csv"), sep = ","), LOCATION == "KOR", select = Value)
+inequalitynewzealand = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/DP_LIVE_17052016053150297.csv"), sep = ","), LOCATION == "NZL", select = Value)
+inequalityportugal = subset(read.csv(text = getURL("https://raw.githubusercontent.com/cyadusha/Data_Extract_From_World_Development_Indicators/master/DP_LIVE_17052016053150297.csv"), sep = ","), LOCATION == "PRT", select = Value)
+```
+
+```{r}
+finalworlddata[which(finalworlddata$`Country Name` == "Australia"), 3] = inequalityaustralia[nrow(inequalityaustralia), ] #2012
+finalworlddata[which(finalworlddata$`Country Name` == "France"), 3] = inequalityfrance[nrow(inequalityfrance), ] #2012
+finalworlddata[which(finalworlddata$`Country Name` == "Iceland"), 3] = inequalityiceland[nrow(inequalityiceland), ] #2012
+finalworlddata[which(finalworlddata$`Country Name` == "South Korea"), 3] = inequalitysouthkorea[nrow(inequalitysouthkorea), ]
+finalworlddata[which(finalworlddata$`Country Name` == "New Zealand"), 3] = inequalitynewzealand[nrow(inequalitynewzealand), ] #2012
+finalworlddata[which(finalworlddata$`Country Name` == "Portugal"), 3] = inequalityportugal[nrow(inequalityportugal), ] #2012
+finalworlddata[which(finalworlddata$`Country Name` == "Russian Federation"), 2] = 0.24 #http://www.undp.org/content/dam/rbec/docs/Poverty-inequality-and-social-policy-reform-in-the-former-Soviet-Union.pdf
+finalworlddata[which(finalworlddata$`Country Name` == "Armenia"), 2] = 0.44
+finalworlddata[which(finalworlddata$`Country Name` == "Azerbaijan"), 2] = 0.35
+finalworlddata[which(finalworlddata$`Country Name` == "Belarus"), 2] = 0.23
+finalworlddata[which(finalworlddata$`Country Name` == "Georgia"), 2] = 0.37
+finalworlddata[which(finalworlddata$`Country Name` == "Kazakhstan"), 2] = 0.26
+finalworlddata[which(finalworlddata$`Country Name` == "Kyrgyzstan"), 2] = 0.26
+finalworlddata[which(finalworlddata$`Country Name` == "Moldova"), 2] = 0.24
+finalworlddata[which(finalworlddata$`Country Name` == "Kazakhstan"), 2] = 0.26
+finalworlddata[which(finalworlddata$`Country Name` == "Tajikistan"), 2] = 0.32
+finalworlddata[which(finalworlddata$`Country Name` == "Turkmenistan"), 2] = 0.26
+finalworlddata[which(finalworlddata$`Country Name` == "Ukraine"), 2] = 0.23
+finalworlddata[which(finalworlddata$`Country Name` == "Uzbekistan"), 2] = 0.25
 ```
 
 Now, we load the worldmap package and plot the map of the entire world and color each country according to its GINI coefficient.
@@ -129,3 +160,7 @@ http://hdr.undp.org/en/content/income-gini-coefficient
 http://databank.worldbank.org/data/reports.aspx?Code=SI.POV.GINI&id=af3ce82b&report_name=Popular_indicators&populartype=series&ispopular=y
 
 http://www.levyinstitute.org/pubs/wp_826.pdf
+
+https://data.oecd.org/inequality/income-inequality.htm
+
+http://www.undp.org/content/dam/rbec/docs/Poverty-inequality-and-social-policy-reform-in-the-former-Soviet-Union.pdf
